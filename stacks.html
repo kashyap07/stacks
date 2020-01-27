@@ -4,65 +4,175 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stacks</title>
+  <style>
+    table {
+      margin-left: 400px;
+      border-collapse: collapse;
+    }
+    table,
+    th,
+    td {
+      border: 2px solid #ccc;
+    }
+    th,
+    td {
+      padding: 5px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-<script type="text/javascript">
-  let currPos = {
-    row: 0,
-    col: 0,
-    len: 5,
-  }
+  <div class="stackyboi"></div>
 
-  let stack = new Array(10)
-    .fill(0)
-    .map(i => Array(10).fill(0));
-  // js prints array lazily on the terminal for some reason. SO you gotto print it like this
-  // fu js
-  //console.log(stack.slice(0, stack.length).map(i => i.slice(0, i.length)));
-  //console.log(JSON.parse(JSON.stringify(stack)))
+  <script type="text/javascript">
+    let currPos = {
+      row: 0,
+      col: 0,
+      len: 5
+    };
 
-  for (let i=currPos.col; i<(currPos.col+currPos.len); ++i) {
-    stack[currPos.row][i] = 1;
-  }
-  //console.log('wololo');
-  //console.log(JSON.parse(JSON.stringify(stack)))
+    let prevPos = {
+      row: -1,
+      col: 0,
+      len: 5
+    };
 
+    let gameState = {
+      direction: "right",
+      speed: "300",
+      running: true
+    };
 
-  let oscillatorinator = setInterval(()=> {
-    let oscillatorinatorinator = (direction) => {
-      while (currPos.col+currPos.len < stack.length) {
-        console.log('right');
-        // check if last element isn't reached
-        // console.log(`row: ${currPos.row}   start: ${currPos.col} -- end: ${currPos.col+currPos.len} -> ${stack[currPos.row][currPos.col+currPos.len-1]}`);
+    let stack = new Array(10).fill(0).map(i => Array(10).fill(0));
 
-        stack[currPos.row][currPos.col] = 0;
-        stack[currPos.row][currPos.col+currPos.len] = 1;
+    // js prints array lazily on the terminal for some reason. SO you gotto print it like this
+    // console.log(JSON.parse(JSON.stringify(stack)))
 
-        currPos.col++;
-        // go right
+    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+      stack[currPos.row][i] = 1;
+    }
+
+    // does the oscillation part
+    let foo = async ({ direction, speed, running }) => {
+      //debugger
+      if (running) {
+        if (direction === "right") {
+          if (currPos.col + currPos.len < stack[0].length) {
+            console.log("-->>", currPos);
+
+            stack[currPos.row][currPos.col] = 0;
+            stack[currPos.row][currPos.col + currPos.len] = 1;
+
+            await new Promise(r => setTimeout(r, speed));
+
+            currPos.col++;
+          } else {
+            gameState.direction = "left";
+          }
+        } else if (direction === "left") {
+          if (currPos.col > 0) {
+            console.log("<<--", currPos);
+
+            stack[currPos.row][currPos.col] = 1;
+            stack[currPos.row][currPos.col + currPos.len - 1] = 0;
+
+            await new Promise(r => setTimeout(r, speed));
+
+            currPos.col--;
+          } else {
+            gameState.direction = "right";
+          }
+        }
+
+        //console.log(JSON.parse(JSON.stringify(stack)))
+        createTable(stack);
+        return foo(gameState);
       }
-      oscillatorinatorinator(left);
+
+      return 0;
+    };
+
+    // checks stuff
+    let bar = () => {
+      if (prevPos.row == -1) {
+        // init
+        console.log("init");
+        nextStep();
+      } else {
+        if (currPos.col === prevPos.col) {
+          // perfect
+          console.log("perfect");
+          nextStep();
+        } else {
+          // wrong
+          if (currPos.len === 1) {
+            // end
+            console.log("end");
+            gameOver();
+            return false;
+          } else {
+            // imperfect
+            // TODO: conditions
+            console.log("imperfect");
+            currPos.len = currPos.len - 1;
+            nextStep();
+          }
+        }
+      }
+    };
+
+    let nextStep = () => {
+      // clone
+      prevPos = { ...currPos };
+
+      currPos.row = currPos.row + 1;
+      gameState.speed = gameState.speed - 10;
+
+      gameState.running = false;
+      foo(gameState);
+
+      gameState.running = true;
+      foo(gameState);
+    };
+
+    let gameOver = () => {
+      gameState.running = false;
+
+      alert("L O S E R");
+    };
+
+    document.addEventListener("click", () => {
+      bar();
+    });
+    
+
+    function createTable(tableData) {
+      var table = document.createElement("table");
+      var tableBody = document.createElement("tbody");
+      var hr = document.createElement("hr");
+      var cp = document.createElement("div");
+
+      tableData.forEach(function(rowData) {
+        var row = document.createElement("tr");
+
+        rowData.forEach(function(cellData) {
+          var cell = document.createElement("td");
+          cell.appendChild(document.createTextNode(cellData));
+          row.appendChild(cell);
+        });
+
+        tableBody.appendChild(row);
+      });
+
+      table.appendChild(tableBody);
+      cp.innerHTML = JSON.stringify(currPos);
+
+      stackyboi.appendChild(cp);
+      stackyboi.appendChild(table);
+      stackyboi.appendChild(hr);
     }
-    if ( currPos.col+currPos.len < stack.length ) {
-      
 
-      console.log(JSON.parse(JSON.stringify(stack)))
-    } else if (currPos.col >= 0 ) {
-      console.log('left');
-      // check if first element isn't reached
-
-      stack[currPos.row][currPos.col-1] = 1;
-      stack[currPos.row][currPos.col+currPos.len-1] = 0;
-
-      // go left
-      currPos.col--;
-    }
-  }, 420);
-
-  //clearInterval(oscillatorinator);
-
-  //console.log(JSON.parse(JSON.stringify(stack)))
-
-</script>
+    let stackyboi = document.querySelector(".stackyboi");
+  </script>
 </body>
 </html>
