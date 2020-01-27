@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stacks</title>
+</head>
+<body>
+<script type="text/javascript">
+  let currPos = {
+    row: 0,
+    col: 0,
+    len: 5,
+  }
+
+  let stack = new Array(10)
+    .fill(0)
+    .map(i => Array(10).fill(0));
+  // js prints array lazily on the terminal for some reason. SO you gotto print it like this
+  // fu js
+  //console.log(stack.slice(0, stack.length).map(i => i.slice(0, i.length)));
+  //console.log(JSON.parse(JSON.stringify(stack)))
+
+  for (let i=currPos.col; i<(currPos.col+currPos.len); ++i) {
+    stack[currPos.row][i] = 1;
+  }
+  //console.log('wololo');
+  //console.log(JSON.parse(JSON.stringify(stack)))
+
+
+  let oscillatorinator = setInterval(()=> {
+    let oscillatorinatorinator = (direction) => {
+      while (currPos.col+currPos.len < stack.length) {
+        console.log('right');
+        // check if last element isn't reached
+        // console.log(`row: ${currPos.row}   start: ${currPos.col} -- end: ${currPos.col+currPos.len} -> ${stack[currPos.row][currPos.col+currPos.len-1]}`);
+
+        stack[currPos.row][currPos.col] = 0;
+        stack[currPos.row][currPos.col+currPos.len] = 1;
+
+        currPos.col++;
+        // go right
+      }
+      oscillatorinatorinator(left);
+    }
+    if ( currPos.col+currPos.len < stack.length ) {
+      
+
+      console.log(JSON.parse(JSON.stringify(stack)))
+    } else if (currPos.col >= 0 ) {
+      console.log('left');
+      // check if first element isn't reached
+
+      stack[currPos.row][currPos.col-1] = 1;
+      stack[currPos.row][currPos.col+currPos.len-1] = 0;
+
+      // go left
+      currPos.col--;
+    }
+  }, 420);
+
+  //clearInterval(oscillatorinator);
+
+  //console.log(JSON.parse(JSON.stringify(stack)))
+
+</script>
+</body>
+</html>
