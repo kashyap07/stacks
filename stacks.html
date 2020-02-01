@@ -5,8 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stacks</title>
   <style>
+    body {
+      background-color: black;
+    }
+    * {
+      color: white;
+    }
     table {
-      margin-left: 300px;
+      margin: 10vh 10vw;
       border-collapse: collapse;
     }
     table,
@@ -27,23 +33,23 @@
 <script type="text/javascript">
   let currPos = {
     row: 0,
-    col: 0,
-    len: 5
+    col: 3,
+    len: 7
   };
 
   let prevPos = {
     row: -1,
-    col: 0,
-    len: 5
+    col: 3,
+    len: 7
   };
 
   let gameState = {
     direction: "right",
-    speed: "200",
+    speed: "100",
     running: true
   };
 
-  let stack = new Array(10).fill("O").map(i => Array(10).fill("O"));
+  let stack = new Array(13).fill("O").map(i => Array(13).fill("O"));
 
   // js prints array lazily on the terminal for some reason. SO you gotto print it like this
   // console.log(JSON.parse(JSON.stringify(stack)))
@@ -51,6 +57,45 @@
   for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
     stack[currPos.row][i] = 1;
   }
+
+  let stackyboi = document.querySelector(".stackyboi");
+
+  let createTable = tableData => {
+    let table = document.createElement("table");
+    let tableBody = document.createElement("tbody");
+    let hr = document.createElement("hr");
+    let cp = document.createElement("div");
+    let pp = document.createElement("div");
+
+    tableData.forEach(rowData => {
+      let row = document.createElement("tr");
+
+      rowData.forEach(cellData => {
+        let cell = document.createElement("td");
+        if (cellData === "O") {
+          cell.appendChild(document.createTextNode(cellData));
+        } else if (cellData === 1) {
+          cell.style.background = "white";
+        }
+        row.appendChild(cell);
+      });
+
+      tableBody.appendChild(row);
+    });
+
+    table.appendChild(tableBody);
+    pp.innerHTML = "prev: " + JSON.stringify(prevPos);
+    cp.innerHTML = "curr: " + JSON.stringify(currPos);
+
+    stackyboi.innerHTML = "";
+    stackyboi.appendChild(pp);
+    stackyboi.appendChild(cp);
+    stackyboi.appendChild(table);
+    stackyboi.appendChild(hr);
+  };
+
+
+  createTable(stack);
 
   let oscillator = null;
 
@@ -107,9 +152,35 @@
         } else {
           // imperfect
           // TODO: conditions
-          console.log("imperfect");
-          currPos.len = currPos.len - 1;
+
+          //console.log("imperfect");
+          //currPos.len = currPos.len - 1;
+          //nextStep();
+
+          for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+            stack[currPos.row][i] = 'O';
+          }
+
+          if (currPos.col < prevPos.col) {
+            // check overlap
+            currPos.len = currPos.len - (prevPos.col-currPos.col);
+            currPos.len = currPos.len >= 0 ? currPos.len : 0;
+            currPos.col = prevPos.col;
+          } else if (currPos.col > prevPos.col) {
+            currPos.len = currPos.len - ((currPos.col+currPos.len)-(prevPos.col+prevPos.len));
+            currPos.len = currPos.len >= 0 ? currPos.len : 0;
+          }
+
+          if (currPos.len === 0) {
+            gameOver();
+          }
+
+          for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+            stack[currPos.row][i] = 1;
+          }
+
           nextStep();
+
         }
       }
     }
@@ -119,7 +190,7 @@
     prevPos = { ...currPos };
 
     currPos.row = currPos.row + 1;
-    gameState.speed = gameState.speed - 10;
+    gameState.speed = gameState.speed - 5;
 
     for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
       stack[currPos.row][i] = 1;
@@ -136,47 +207,12 @@
     gameState.running = false;
 
     alert("L O S E R");
+    return 0;
   };
 
   document.addEventListener("click", () => {
     bar();
   });
-
-  let createTable = tableData => {
-    let table = document.createElement("table");
-    let tableBody = document.createElement("tbody");
-    let hr = document.createElement("hr");
-    let cp = document.createElement("div");
-    let pp = document.createElement("div");
-
-    tableData.forEach(rowData => {
-      let row = document.createElement("tr");
-
-      rowData.forEach(cellData => {
-        let cell = document.createElement("td");
-        if (cellData === "O") {
-          cell.appendChild(document.createTextNode(cellData));
-        } else if (cellData === 1) {
-          cell.style.background = "#0080ff";
-        }
-        row.appendChild(cell);
-      });
-
-      tableBody.appendChild(row);
-    });
-
-    table.appendChild(tableBody);
-    pp.innerHTML = "prev: " + JSON.stringify(prevPos);
-    cp.innerHTML = "curr: " + JSON.stringify(currPos);
-
-    stackyboi.innerHTML = "";
-    stackyboi.appendChild(pp);
-    stackyboi.appendChild(cp);
-    stackyboi.appendChild(table);
-    stackyboi.appendChild(hr);
-  };
-
-  let stackyboi = document.querySelector(".stackyboi");
 </script>
 </body>
 </html>
