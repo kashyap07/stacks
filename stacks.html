@@ -7,13 +7,26 @@
   <style>
     body {
       background-color: black;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding-top: 20px;
+    }
+    .stackyboi {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
     * {
       color: white;
       user-select: none;
+      font-family: monospace;
     }
     table {
-      margin: 10vh 10vw;
+      margin-top: 30px;
       border-collapse: collapse;
       border: 1px solid white;
     }
@@ -34,6 +47,7 @@
   </style>
 </head>
 <body>
+<h1 class="condition">STACKS</h1>
 <div class="stackyboi"></div>
 
 <script type="text/javascript">
@@ -47,7 +61,7 @@
 
   let gameState = {
     direction: "right",
-    speed: "100",
+    speed: "60",
     running: false
   };
 
@@ -58,18 +72,17 @@
     return new Array(rows).fill("0").map(i => Array(cols).fill("0"));
   }
 
-  let stack = createStack(10, 10);
+  let stack = createStack(10, 15);
 
   let stackyboi = document.querySelector(".stackyboi");
 
   let createTable = tableData => {
     let table = document.createElement("table");
     let tableBody = document.createElement("tbody");
-    let hr = document.createElement("hr");
     let cp = document.createElement("div");
     let pp = document.createElement("div");
 
-    tableData.forEach(rowData => {
+    tableData.slice().reverse().forEach(rowData => {
       let row = document.createElement("tr");
 
       rowData.forEach(cellData => {
@@ -93,7 +106,6 @@
     stackyboi.appendChild(pp);
     stackyboi.appendChild(cp);
     stackyboi.appendChild(table);
-    stackyboi.appendChild(hr);
   };
 
 
@@ -137,12 +149,11 @@
   let bar = () => {
     if (!gameState.running) {
       // reset
-      
-      stack = createStack(10, 10);
+      stack = createStack(10, 15);
 
       gameState = {
         direction: "right",
-        speed: "100",
+        speed: "60",
         running: true
       };
 
@@ -211,7 +222,7 @@
       prevPos = { ...currPos };
 
       currPos.row = currPos.row + 1;
-      gameState.speed = gameState.speed - 5;
+      gameState.speed = gameState.speed - 2;
 
       for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
         stack[currPos.row][i] = 1;
@@ -229,12 +240,12 @@
 
   let gameOver = () => {
     gameState.running = false;
-    alert("Game Over!");
+    document.querySelector('.condition').innerHTML = 'GAME OVER!';
   };
 
   let winCondition = () => {
     gameState.running = false;
-    alert("You Win!");
+    document.querySelector('.condition').innerHTML = 'YOU WIN!';
   }
 
   document.addEventListener("click", () => {
