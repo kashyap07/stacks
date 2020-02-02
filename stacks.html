@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, user-scalable=no">
   <title>Stacks</title>
   <style>
     body {
@@ -20,9 +20,13 @@
       align-items: center;
       flex-direction: column;
     }
+    html {
+      touch-action: manipulation;
+    }
     * {
       color: white;
       user-select: none;
+      -webkit-user-select: none;
       font-family: monospace;
     }
     table {
@@ -164,6 +168,8 @@
       };
 
       prevPos = {...currPos};
+
+      document.querySelector('.condition').innerHTML = 'STACKS';
     };
 
     if (prevPos.row == -1) {
@@ -222,7 +228,7 @@
       prevPos = { ...currPos };
 
       currPos.row = currPos.row + 1;
-      gameState.speed = gameState.speed - 2;
+      gameState.speed = gameState.speed - 4;
 
       for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
         stack[currPos.row][i] = 1;
@@ -252,12 +258,16 @@
     bar();
   });
 
-  document.addEventListener('keyup', e => {
+  document.addEventListener('keydown', e => {
     if (e.code === 'Space' || e.code === 'Enter') {
       e.preventDefault();
       bar();
     }
   });
+
+  /*document.addEventListener("touchstart", () => {
+    bar();
+  });*/
 
 </script>
 </body>
