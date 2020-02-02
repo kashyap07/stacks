@@ -1,293 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no">
-  <title>Stacks</title>
-  <style>
-    body {
-      background-color: black;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding-top: 20px;
-    }
-    .stackyboi {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-    html {
-      touch-action: manipulation;
-    }
-    * {
-      color: white;
-      user-select: none;
-      -webkit-user-select: none;
-      font-family: monospace;
-    }
-    table {
-      margin-top: 30px;
-      border-collapse: collapse;
-      border: 1px solid white;
-    }
-    table,
-    th,
-    td {
-      border-top: 1px solid white;
-      border-bottom: 1px solid white;
-    }
-    th,
-    td {
-      padding: 5px 10px;
-      text-align: left;
-
-      width: 10px;
-      height: 10px;
-    }
-  </style>
-</head>
-<body>
-<h1 class="condition">STACKS</h1>
-<div class="stackyboi"></div>
-
-<script type="text/javascript">
-  let currPos = {
-    row: -1,
-    col: 0,
-    len: 7
-  };
-
-  let prevPos = {...currPos};
-
-  let gameState = {
-    direction: "right",
-    speed: "60",
-    running: false
-  };
-
-  // js prints array lazily on the terminal for some reason. SO you gotto print it like this
-  // console.log(JSON.parse(JSON.stringify(stack)))
-
-  let createStack = (rows, cols) => {
-    return new Array(rows).fill("0").map(i => Array(cols).fill("0"));
-  }
-
-  let stack = createStack(10, 15);
-
-  let stackyboi = document.querySelector(".stackyboi");
-
-  let createTable = tableData => {
-    let table = document.createElement("table");
-    let tableBody = document.createElement("tbody");
-    let cp = document.createElement("div");
-    let pp = document.createElement("div");
-
-    tableData.slice().reverse().forEach(rowData => {
-      let row = document.createElement("tr");
-
-      rowData.forEach(cellData => {
-        let cell = document.createElement("td");
-        if (cellData === "0") {
-          cell.appendChild(document.createTextNode(cellData));
-        } else if (cellData === 1) {
-          cell.style.background = "white";
-        }
-        row.appendChild(cell);
-      });
-
-      tableBody.appendChild(row);
-    });
-
-    table.appendChild(tableBody);
-    pp.innerHTML = "prev: " + JSON.stringify(prevPos);
-    cp.innerHTML = "curr: " + JSON.stringify(currPos);
-
-    stackyboi.innerHTML = "";
-    stackyboi.appendChild(pp);
-    stackyboi.appendChild(cp);
-    stackyboi.appendChild(table);
-  };
-
-
-  createTable(stack);
-
-  let oscillator = null;
-
-  let foo = () => {
-    oscillator = setInterval(() => {
-      if (gameState.running) {
-        if (gameState.direction === "right") {
-          if (currPos.col + currPos.len < stack[0].length) {
-            console.log("-->>", currPos);
-
-            stack[currPos.row][currPos.col] = "0";
-            stack[currPos.row][currPos.col + currPos.len] = 1;
-
-            currPos.col++;
-          } else {
-            gameState.direction = "left";
-          }
-        } else if (gameState.direction === "left") {
-          if (currPos.col > 0) {
-            console.log("<<--", currPos);
-
-            stack[currPos.row][currPos.col - 1] = 1;
-            stack[currPos.row][currPos.col + currPos.len - 1] = "0";
-
-            currPos.col--;
-          } else {
-            gameState.direction = "right";
-          }
-        }
-
-        createTable(stack);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>Stacks</title>
+    <style>
+      * {
+        color: white;
+        user-select: none;
+        -webkit-user-select: none;
+        font-family: monospace;
       }
-    }, gameState.speed);
-  };
+      html {
+        touch-action: manipulation;
+      }
+      body {
+        background-color: black;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding-top: 20px;
+      }
+      .stackyboi {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      table {
+        margin-top: 30px;
+        border-collapse: collapse;
+        border: 1px solid white;
+      }
+      table,
+      th,
+      td {
+        border-top: 1px solid white;
+        border-bottom: 1px solid white;
+      }
+      th,
+      td {
+        padding: 5px 10px;
+        text-align: left;
 
-  // checks stuff
-  let bar = () => {
-    if (!gameState.running) {
-      // reset
-      stack = createStack(10, 15);
+        width: 10px;
+        height: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="condition">STACKS</h1>
+    <div class="stackyboi"></div>
 
-      gameState = {
-        direction: "right",
-        speed: "60",
-        running: true
+    <script type="text/javascript">
+      /*
+       * Functions
+       */
+
+      // create and retrurn 2D array stack
+      const createStack = ({ rows, columns: cols }) => {
+        return new Array(rows).fill(0).map(i => Array(cols).fill(0));
       };
 
-      currPos = {
+      // paint with required value
+      const paintCurrRow = value => {
+        for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+          stack[currPos.row][i] = value;
+        }
+      };
+
+      // calculate what the new values of currPos should be
+      const calculateImperfection = (
+        { row, col: currCol, len: currLen },
+        { _, col: prevCol, len: prevLen }
+      ) => {
+        if (currCol < prevCol) {
+          currLen -= prevCol - currCol;
+          currCol = prevCol;
+        } else if (currCol > prevCol) {
+          currLen -= currCol + currLen - (prevCol + prevLen);
+        }
+        if (currLen < 0) currLen = 0;
+
+        return { row, col: currCol, len: currLen };
+      };
+
+      // next step if game hasn't ended yet
+      const nextStep = () => {
+        if (currPos.row === stack.length - 1) {
+          winCondition();
+        } else {
+          prevPos = { ...currPos };
+          currPos.row += 1;
+          gameState.speed -= difficulty;
+
+          paintCurrRow(1);
+
+          if (oscillator) clearInterval(oscillator);
+          oscillatorinator(currPos, gameState);
+        }
+      };
+
+      // lose condition. Stop game, show message
+      const gameOver = () => {
+        gameState.running = false;
+        gameStatus.innerHTML = "GAME OVER!";
+      };
+
+      // win condition. Trim top, stop game, show message
+      const winCondition = () => {
+        paintCurrRow(0);
+        currPos = calculateImperfection(currPos, prevPos);
+        paintCurrRow(1);
+
+        createTable(stack);
+        gameState.running = false;
+        gameStatus.innerHTML = "YOU WIN!";
+      };
+
+      // reset all values to inital, clean stack, start game
+      const reset = () => {
+        gameState = { ...initGameState };
+        currPos = { ...initCurrPos };
+        prevPos = { ...currPos };
+        gameState.running = true;
+
+        stack = createStack(stackSize);
+      };
+
+      // create fresh table, replace current table creating the illusion of animation
+      const createTable = tableData => {
+        let table = document.createElement("table");
+        let tableBody = document.createElement("tbody");
+        let cp = document.createElement("div");
+        let pp = document.createElement("div");
+
+        // print in reverse order
+        tableData
+          .slice()
+          .reverse()
+          .forEach(rowData => {
+            let row = document.createElement("tr");
+            rowData.forEach(cellData => {
+              let cell = document.createElement("td");
+              if (cellData === 0) {
+                cell.appendChild(document.createTextNode(cellData));
+              } else if (cellData === 1) {
+                cell.style.background = "white";
+              }
+              row.appendChild(cell);
+            });
+            tableBody.appendChild(row);
+          });
+
+        table.appendChild(tableBody);
+        pp.innerHTML = "prev: " + JSON.stringify(prevPos);
+        cp.innerHTML = "curr: " + JSON.stringify(currPos);
+        stackyboi.innerHTML = "";
+        stackyboi.appendChild(pp);
+        stackyboi.appendChild(cp);
+        stackyboi.appendChild(table);
+      };
+
+      // decisions based on current state
+      const clickHandler = () => {
+        if (!gameState.running) {
+          reset();
+          gameStatus.innerHTML = "STACKS";
+        }
+
+        if (prevPos.row == -1) {
+          // initial step
+          nextStep();
+        } else if (currPos.col === prevPos.col) {
+          // perfect placement
+          nextStep();
+        } else {
+          // imperfect placement
+          paintCurrRow(0);
+          currPos = calculateImperfection(currPos, prevPos);
+          if (currPos.len === 0) gameOver();
+          paintCurrRow(1);
+          nextStep();
+        }
+      };
+
+      const oscillatorinator = (currPos, gameState) => {
+        oscillator = setInterval(() => {
+          if (gameState.running) {
+            if (gameState.direction === "right") {
+              if (currPos.col + currPos.len < stack[0].length) {
+                // console.log("-->>", currPos);
+                stack[currPos.row][currPos.col] = 0;
+                stack[currPos.row][currPos.col + currPos.len] = 1;
+
+                currPos.col++;
+              } else {
+                gameState.direction = "left";
+              }
+            } else if (gameState.direction === "left") {
+              if (currPos.col > 0) {
+                // console.log("<<--", currPos);
+                stack[currPos.row][currPos.col - 1] = 1;
+                stack[currPos.row][currPos.col + currPos.len - 1] = 0;
+
+                currPos.col--;
+              } else {
+                gameState.direction = "right";
+              }
+            }
+
+            // fake animation
+            createTable(stack);
+          }
+        }, gameState.speed);
+      };
+
+      /* ----------------------------------------------------------------------------- */
+
+      /*
+       * Initializations
+       */
+
+      const gameStatus = document.querySelector(".condition");
+      const stackyboi = document.querySelector(".stackyboi");
+
+      const initGameState = {
+        direction: "right",
+        speed: "60",
+        running: false
+      };
+      const difficulty = 4;
+      const initCurrPos = {
         row: -1,
         col: 0,
         len: 7
       };
+      const stackSize = {
+        rows: 10,
+        columns: 15
+      };
 
-      prevPos = {...currPos};
+      let oscillator = null;
 
-      document.querySelector('.condition').innerHTML = 'STACKS';
-    };
+      let gameState = { ...initGameState };
+      let currPos = { ...initCurrPos };
+      let prevPos = { ...currPos };
 
-    if (prevPos.row == -1) {
-      // init
-      console.log("init");
-      nextStep();
-    } else {
-      if (currPos.col === prevPos.col) {
-        // perfect
-        console.log("perfect");
-        nextStep();
-      } else {
-        // wrong
-        if (currPos.len === 1) {
-          // end
-          console.log("end");
-          gameOver();
+      let stack = createStack(stackSize);
 
-          return false;
-        } else {
-          // imperfect
+      createTable(stack);
 
-          for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-            stack[currPos.row][i] = '0';
-          }
+      /* ----------------------------------------------------------------------------- */
 
-          if (currPos.col < prevPos.col) {
-            // check overlap
-            currPos.len = currPos.len - (prevPos.col-currPos.col);
-            currPos.len = currPos.len >= 0 ? currPos.len : 0;
-            currPos.col = prevPos.col;
-          } else if (currPos.col > prevPos.col) {
-            currPos.len = currPos.len - ((currPos.col+currPos.len)-(prevPos.col+prevPos.len));
-            currPos.len = currPos.len >= 0 ? currPos.len : 0;
-          }
+      /*
+       * Event Handler
+       */
 
-          if (currPos.len === 0) {
-            gameOver();
-            return false;
-          }
+      document.addEventListener("click", () => clickHandler());
 
-          for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-            stack[currPos.row][i] = 1;
-          }
-
-          nextStep();
+      document.addEventListener("keydown", e => {
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          clickHandler();
         }
-      }
-    }
-  };
-
-  let nextStep = () => {
-    if (currPos.row === (stack.length-1)) {
-      winCondition();
-    } else {
-      prevPos = { ...currPos };
-
-      currPos.row = currPos.row + 1;
-      gameState.speed = gameState.speed - 4;
-
-      for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-        stack[currPos.row][i] = 1;
-      }
-
-      if (oscillator) {
-        clearInterval(oscillator);
-      }
-
-      foo();
-    }
-    
-    return 0;
-  };
-
-  let gameOver = () => {
-    gameState.running = false;
-    document.querySelector('.condition').innerHTML = 'GAME OVER!';
-  };
-
-  let winCondition = () => {
-    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-      stack[currPos.row][i] = '0';
-    }
-
-    if (currPos.col < prevPos.col) {
-      // check overlap
-      currPos.len = currPos.len - (prevPos.col-currPos.col);
-      currPos.len = currPos.len >= 0 ? currPos.len : 0;
-      currPos.col = prevPos.col;
-    } else if (currPos.col > prevPos.col) {
-      currPos.len = currPos.len - ((currPos.col+currPos.len)-(prevPos.col+prevPos.len));
-      currPos.len = currPos.len >= 0 ? currPos.len : 0;
-    }
-
-    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-      stack[currPos.row][i] = 1;
-    }
-
-    createTable(stack);
-    gameState.running = false;
-    document.querySelector('.condition').innerHTML = 'YOU WIN!';
-  }
-
-  document.addEventListener("click", () => {
-    bar();
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.code === 'Space' || e.code === 'Enter') {
-      e.preventDefault();
-      bar();
-    }
-  });
-
-  /*document.addEventListener("touchstart", () => {
-    bar();
-  });*/
-
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>
