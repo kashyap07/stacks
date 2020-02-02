@@ -10,20 +10,26 @@
     }
     * {
       color: white;
+      user-select: none;
     }
     table {
       margin: 10vh 10vw;
       border-collapse: collapse;
+      border: 1px solid white;
     }
     table,
     th,
     td {
-      border-top: 2px solid white;
+      border-top: 1px solid white;
+      border-bottom: 1px solid white;
     }
     th,
     td {
       padding: 5px 10px;
       text-align: left;
+
+      width: 10px;
+      height: 10px;
     }
   </style>
 </head>
@@ -32,31 +38,27 @@
 
 <script type="text/javascript">
   let currPos = {
-    row: 0,
-    col: 3,
+    row: -1,
+    col: 0,
     len: 7
   };
 
-  let prevPos = {
-    row: -1,
-    col: 3,
-    len: 7
-  };
+  let prevPos = {...currPos};
 
   let gameState = {
     direction: "right",
     speed: "100",
-    running: true
+    running: false
   };
-
-  let stack = new Array(13).fill("O").map(i => Array(13).fill("O"));
 
   // js prints array lazily on the terminal for some reason. SO you gotto print it like this
   // console.log(JSON.parse(JSON.stringify(stack)))
 
-  for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-    stack[currPos.row][i] = 1;
+  let createStack = (rows, cols) => {
+    return new Array(rows).fill("0").map(i => Array(cols).fill("0"));
   }
+
+  let stack = createStack(10, 10);
 
   let stackyboi = document.querySelector(".stackyboi");
 
@@ -72,7 +74,7 @@
 
       rowData.forEach(cellData => {
         let cell = document.createElement("td");
-        if (cellData === "O") {
+        if (cellData === "0") {
           cell.appendChild(document.createTextNode(cellData));
         } else if (cellData === 1) {
           cell.style.background = "white";
@@ -106,7 +108,7 @@
           if (currPos.col + currPos.len < stack[0].length) {
             console.log("-->>", currPos);
 
-            stack[currPos.row][currPos.col] = "O";
+            stack[currPos.row][currPos.col] = "0";
             stack[currPos.row][currPos.col + currPos.len] = 1;
 
             currPos.col++;
@@ -118,7 +120,7 @@
             console.log("<<--", currPos);
 
             stack[currPos.row][currPos.col - 1] = 1;
-            stack[currPos.row][currPos.col + currPos.len - 1] = "O";
+            stack[currPos.row][currPos.col + currPos.len - 1] = "0";
 
             currPos.col--;
           } else {
@@ -133,6 +135,26 @@
 
   // checks stuff
   let bar = () => {
+    if (!gameState.running) {
+      // reset
+      
+      stack = createStack(10, 10);
+
+      gameState = {
+        direction: "right",
+        speed: "100",
+        running: true
+      };
+
+      currPos = {
+        row: -1,
+        col: 0,
+        len: 7
+      };
+
+      prevPos = {...currPos};
+    };
+
     if (prevPos.row == -1) {
       // init
       console.log("init");
@@ -148,17 +170,13 @@
           // end
           console.log("end");
           gameOver();
+
           return false;
         } else {
           // imperfect
-          // TODO: conditions
-
-          //console.log("imperfect");
-          //currPos.len = currPos.len - 1;
-          //nextStep();
 
           for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-            stack[currPos.row][i] = 'O';
+            stack[currPos.row][i] = '0';
           }
 
           if (currPos.col < prevPos.col) {
@@ -173,6 +191,7 @@
 
           if (currPos.len === 0) {
             gameOver();
+            return false;
           }
 
           for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
@@ -180,39 +199,55 @@
           }
 
           nextStep();
-
         }
       }
     }
   };
 
   let nextStep = () => {
-    prevPos = { ...currPos };
+    if (currPos.row === (stack.length-1)) {
+      winCondition();
+    } else {
+      prevPos = { ...currPos };
 
-    currPos.row = currPos.row + 1;
-    gameState.speed = gameState.speed - 5;
+      currPos.row = currPos.row + 1;
+      gameState.speed = gameState.speed - 5;
 
-    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
-      stack[currPos.row][i] = 1;
+      for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+        stack[currPos.row][i] = 1;
+      }
+
+      if (oscillator) {
+        clearInterval(oscillator);
+      }
+
+      foo();
     }
-
-    if (oscillator) {
-      clearInterval(oscillator);
-    }
-
-    foo();
+    
+    return 0;
   };
 
   let gameOver = () => {
     gameState.running = false;
-
-    alert("L O S E R");
-    return 0;
+    alert("Game Over!");
   };
+
+  let winCondition = () => {
+    gameState.running = false;
+    alert("You Win!");
+  }
 
   document.addEventListener("click", () => {
     bar();
   });
+
+  document.addEventListener('keyup', e => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      bar();
+    }
+  });
+
 </script>
 </body>
 </html>
