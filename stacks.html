@@ -250,6 +250,25 @@
   };
 
   let winCondition = () => {
+    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+      stack[currPos.row][i] = '0';
+    }
+
+    if (currPos.col < prevPos.col) {
+      // check overlap
+      currPos.len = currPos.len - (prevPos.col-currPos.col);
+      currPos.len = currPos.len >= 0 ? currPos.len : 0;
+      currPos.col = prevPos.col;
+    } else if (currPos.col > prevPos.col) {
+      currPos.len = currPos.len - ((currPos.col+currPos.len)-(prevPos.col+prevPos.len));
+      currPos.len = currPos.len >= 0 ? currPos.len : 0;
+    }
+
+    for (let i = currPos.col; i < currPos.col + currPos.len; ++i) {
+      stack[currPos.row][i] = 1;
+    }
+
+    createTable(stack);
     gameState.running = false;
     document.querySelector('.condition').innerHTML = 'YOU WIN!';
   }
