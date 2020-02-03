@@ -3,4 +3,6 @@ An attempt at recreating the mobile game stacks.
 
 Inspired by - [https://www.luketmillar.com/puzzles/stacks/](https://www.luketmillar.com/puzzles/stacks/)
 
-Progress is going to be real slow. And super iterative (and also very crude).
+This is v1 of stacks.  
+Perfect algo, but with fake animation where the table is re-rendered each time.  
+Just commonJS. Simple.  
