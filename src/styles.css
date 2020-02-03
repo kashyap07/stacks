@@ -1,0 +1,48 @@
+* {
+  color: white;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: monospace;
+}
+
+html {
+  touch-action: manipulation;
+}
+
+body {
+  background-color: black;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.stackyboi {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+table {
+  margin-top: 30px;
+  border-collapse: collapse;
+  border: 1px solid white;
+}
+
+table,
+th,
+td {
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+th,
+td {
+  padding: 5px 10px;
+  text-align: left;
+  width: 10px;
+  height: 10px;
+}
