@@ -13,7 +13,7 @@ const initCurrPos = {
   len: 7
 };
 const stackSize = {
-  rows: 3,
+  rows: 10,
   columns: 15
 };
 
@@ -26,7 +26,6 @@ let prevPos = { ...currPos };
 let stack = createStack(stackSize);
 
 createTable(stack);
-
 
 /*
  * Click handler
@@ -56,7 +55,6 @@ const clickHandler = () => {
     nextStep();
   }
 };
-
 
 /*
  * Event Handlers
