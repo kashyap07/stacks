@@ -1,11 +1,13 @@
 import React from "react";
 import "./App.css";
+import GameSate from "./GameState";
+import Stacks from "./Stacks";
 
 function App() {
   return (
     <div className="App">
-      <h1 className="condition">STACKS</h1>
-      <div className="stackyboi"></div>
+      <GameSate state="Game over!" />
+      <Stacks rows={10} columns={20} />
     </div>
   );
 }
