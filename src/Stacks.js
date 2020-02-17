@@ -1,6 +1,21 @@
 import React from "react";
 import { createTable, createStack, paintCurrRow } from "./utils";
 
+const initGameState = {
+  direction: "right",
+  speed: "60",
+  running: false,
+  difficulty: 4
+};
+
+const initCurrPos = {
+  row: -1,
+  col: 0,
+  len: 7
+};
+
+let oscillator = null;
+
 class Stacks extends React.Component {
   constructor(props) {
     super(props);
@@ -9,25 +24,6 @@ class Stacks extends React.Component {
       columns: this.props.columns
     };
 
-    // this.gameStatusElem = document.querySelector(".game-state");
-    const stackyboi = document.querySelector(".stackyboi");
-
-    const initGameState = {
-      direction: "right",
-      speed: "60",
-      running: false,
-      difficulty: 4
-    };
-    const initCurrPos = {
-      row: -1,
-      col: 0,
-      len: 7
-    };
-
-    let oscillator = null;
-
-    console.log(this);
-
     this.state = {
       gameState: { ...initGameState },
       currPos: { ...initCurrPos },
@@ -35,8 +31,6 @@ class Stacks extends React.Component {
     };
 
     this.stack = createStack(this.stackSize);
-
-    // createTable(stackyboi, this.state.currPos, prevPos, stack);
 
     /*
      * Click handler
@@ -120,7 +114,8 @@ class Stacks extends React.Component {
 
     // lose condition. Stop game, show message
     const gameOver = () => {
-      this.state.gameState.running = false;
+      this.setState({ gameState: false });
+      this.forceUpdate();
       this.gameStatusElem.innerHTML = "GAME OVER!";
     };
 
@@ -131,10 +126,9 @@ class Stacks extends React.Component {
         this.state.currPos,
         this.state.prevPos
       );
-      paintCurrRow(this.stack, this.state.currPos, 1);
+      this.setState({ gameState: false });
+      this.forceUpdate();
 
-      createTable(this.state.currPos, this.state.prevPos, this.stack);
-      this.state.gameState.running = false;
       this.gameStatusElem.innerHTML = "YOU WIN!";
     };
 
@@ -148,7 +142,7 @@ class Stacks extends React.Component {
       this.stack = createStack(this.stackSize);
     };
 
-    const oscillatorinator = (stackyboi, currPos, gameState) => {
+    const oscillatorinator = (currPos, gameState) => {
       oscillator = setInterval(() => {
         if (this.state.gameState.running) {
           if (this.state.gameState.direction === "right") {
@@ -163,6 +157,7 @@ class Stacks extends React.Component {
               ] = 1;
 
               this.state.currPos.col++;
+              this.forceUpdate();
             } else {
               this.state.gameState.direction = "left";
             }
@@ -176,16 +171,12 @@ class Stacks extends React.Component {
                 this.state.currPos.col + this.state.currPos.len - 1
               ] = 0;
 
-              currPos.col--;
+              this.state.currPos.col--;
+              this.forceUpdate();
             } else {
               this.state.gameState.direction = "right";
             }
           }
-
-          console.log(stackyboi);
-
-          // fake animation
-          createTable(this.state.currPos, this.state.prevPos, this.stack);
         }
       }, this.state.gameState.speed);
     };
@@ -194,11 +185,12 @@ class Stacks extends React.Component {
     return <div className="stackyboi"></div>;
   }
   componentDidMount() {
-    console.log(this);
-
     this.gameStatusElem = document.querySelector(".game-state");
-
     createTable(this.state.currPos, this.state.prevPos, this.stack);
+  }
+  componentDidUpdate() {
+    createTable(this.state.currPos, this.state.prevPos, this.stack);
+    paintCurrRow(this.stack, this.state.currPos, 1);
   }
 }
 

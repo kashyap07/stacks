@@ -6,8 +6,8 @@ import Stacks from "./Stacks";
 function App() {
   return (
     <div className="App">
-      <GameSate state="Game over!" />
-      <Stacks rows={10} columns={20} />
+      <GameSate state="" />
+      <Stacks rows={3} columns={20} />
     </div>
   );
 }
