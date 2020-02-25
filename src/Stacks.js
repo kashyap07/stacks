@@ -69,7 +69,9 @@ class Stacks extends React.Component {
      */
     document.addEventListener("click", () => clickHandler());
 
+    // keyup doesn't feel responsive enough
     document.addEventListener("keydown", e => {
+      if (e.repeat) return;
       if (e.code === "Space" || e.code === "Enter") {
         e.preventDefault();
         clickHandler();
@@ -79,7 +81,6 @@ class Stacks extends React.Component {
     /*
      * Functions
      */
-
     // calculate what the new values of currPos should be
     const calculateImperfection = (
       { row, col: currCol, len: currLen },
