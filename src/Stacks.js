@@ -114,8 +114,7 @@ class Stacks extends React.Component {
 
     // lose condition. Stop game, show message
     const gameOver = () => {
-      this.setState({ gameState: false });
-      this.forceUpdate();
+      this.state.gameState = false;
       this.gameStatusElem.innerHTML = "GAME OVER!";
     };
 

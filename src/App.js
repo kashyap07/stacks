@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <GameSate state="" />
-      <Stacks rows={3} columns={20} />
+      <Stacks rows={10} columns={20} />
     </div>
   );
 }
